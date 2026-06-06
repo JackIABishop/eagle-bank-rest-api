@@ -53,7 +53,7 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
   - Language: Python
     - This is the language I will write the application logic in. It is the base layer that everything else is built with, and it is the language I am most comfortable moving quickly in and explaining clearly in review.
   - Web framework / API layer: FastAPI
-    - This is the part that exposes the backend as an HTTP API. It handles routes, requests, responses, and works neatly with typed models. I like it here because it maps well to an OpenAPI-driven API.
+    - This is the part that exposes the backend as an HTTP API. It handles routes, requests, responses, and works neatly with typed models. I like it here because it maps well to an OpenAPI-driven API, and it gives me generated interactive documentation at `/docs` from the implementation itself.
   - Data / ORM layer: SQLAlchemy
     - This is the layer that helps the Python application talk to the database in a structured way, without me writing raw SQL for everything. I like it because it gives me a standard ORM/data layer rather than hand-rolling database access.
   - Database engine: SQLite
@@ -112,12 +112,36 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
   - I still like the idea of checking that the referenced user in the token still exists.
   - The existing `CreateUserRequest`/`UpdateUserRequest` schema did not require a password, so I have added this to support the auth flow properly.
 
+### Configuring FastAPI
+- I now have the first application scaffold in place, and this is how I am thinking about the structure:
+  - `app/main.py`
+    - FastAPI entrypoint. This creates the app, registers exception handlers, and includes routers.
+  - `app/config.py`
+    - Application settings such as app name, database URL, JWT secret, algorithm, and token expiry.
+  - `app/db.py`
+    - SQLAlchemy engine, session factory, base model class, and database session dependency.
+  - `app/models/`
+    - ORM models representing database tables. At the moment this starts with `User`.
+  - `app/schemas/`
+    - Pydantic models for request and response validation.
+  - `app/routers/`
+    - HTTP endpoints. At the moment this includes health and auth routes.
+  - `app/services/`
+    - Business logic, so the routes stay thinner and less cluttered.
+  - `app/errors.py`
+    - Global exception handling so validation and HTTP errors return in a format closer to the API contract.
+  - `tests/`
+    - API and service tests once I start building out the actual behaviour.
+- I used AI here to help create the initial scaffold and boilerplate, but I still need to review and understand each part of the structure before building further on top of it.
+
+
+
 
 ### Plan for tomorrow
 - [x] Review `openapi.yaml` path by path and confirm the user/account/transaction flows
 - [x] Decide and document the auth endpoint contract for `POST /v1/auth/login`
-- [ ] Scaffold the actual project structure for the FastAPI application
-- [ ] Set up FastAPI app entrypoint, config, and SQLAlchemy database session
+- [x] Scaffold the actual project structure for the FastAPI application
+- [x] Set up FastAPI app entrypoint, config, and SQLAlchemy database session
 - [ ] Build user schemas, model, service, and router together as the first full vertical slice
 - [ ] Add the core user error scenarios and tests
 - [ ] If time allows, start the account layer after the user/auth path is working cleanly
@@ -131,7 +155,10 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
 
 ### Completed Today
 - [x] Set up git repo and planning/admin files
-- [ ] Scaffold project structure
+- [x] Scaffold project structure
+- [x] Set up FastAPI app entrypoint, config, and SQLAlchemy database session
+- [x] Add a first auth route and health route
+- [x] Get the scaffold running locally with `/health` and `/docs`
 
 
 ## Questions / things I want to clear up

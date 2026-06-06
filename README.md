@@ -34,6 +34,19 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## Run The API
+
+Start the local development server with:
+
+```bash
+uvicorn app.main:app --reload
+```
+
+Once it is running, the main URLs are:
+
+- `http://127.0.0.1:8000/health`
+- `http://127.0.0.1:8000/docs`
+
 ## Notes
 
 - SQLite is file-based, so there is no separate database server to start.

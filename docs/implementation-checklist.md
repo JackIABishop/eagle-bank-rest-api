@@ -21,7 +21,7 @@ The aim is to cover at least one of each CRUD-style operation across the main el
 - [x] ★ Confirm final stack and repo structure
 - [ ] ★ Review `openapi.yaml` in full
 - [x] ★ Define auth endpoint and update OpenAPI spec
-- [ ] ★ Set up app scaffold, config, and database session
+- [x] ★ Set up app scaffold, config, and database session
 - [ ] ★ Set up test structure
 
 ## User
@@ -38,8 +38,8 @@ The aim is to cover at least one of each CRUD-style operation across the main el
 
 ## Authentication
 
-- [ ] ★ Implement login endpoint
-- [ ] ★ Return JWT bearer token
+- [x] ★ Implement login endpoint
+- [x] ★ Return JWT bearer token
 - [ ] ★ Reject invalid credentials
 - [ ] Add tests for authentication flows
 
