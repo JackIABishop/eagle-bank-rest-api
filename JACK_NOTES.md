@@ -4,7 +4,9 @@
 Implementation tracking lives in [`docs/implementation-checklist.md`](docs/implementation-checklist.md).
 
 ## Total Time taken: 
-### 6th June: 
+### 6th June: 2h 30m
+### 7th June: 
+
 
 
 ## 6th June 2026 
@@ -65,19 +67,81 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
   - validation rules
 
 
-### Questions / things I want to clear up
+### Completed Today
+- [x] Understood requirements
+- [x] Worked with GPT to understand the available tech stack options and pick a direction
+
+## 7th June 2026
+### 10:00 Authenticating a user 
+- I want authentication to be simple and defensible:
+  - `POST /v1/auth/login`
+  - request body: `email` and `password`
+  - validate both fields on the server side
+  - validate email format on the server side as well, rather than assuming the client has done it
+  - if the credentials are correct, return a JWT bearer token
+  - if the credentials are wrong, return `401`
+- I do think the token should expire.
+  - That is a sensible default for a banking-style API.
+  - It also gives me something concrete to explain in review rather than pretending tokens last forever.
+- My current thinking for the success response is:
+  - `accessToken`
+  - `tokenType`
+  - `expiresIn`
+- Example request:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "correct-horse-battery"
+}
+```
+
+- Example success response:
+
+```json
+{
+  "accessToken": "eyJhbGciOi...",
+  "tokenType": "Bearer",
+  "expiresIn": 3600
+}
+```
+
+- Important implementation note:
+  - I do not think the access token itself should be stored against the user and matched on every request.
+  - My understanding is that the server signs the JWT, the client presents it later, and the server validates the token signature, expiry, and payload before using the referenced user identity.
+  - I still like the idea of checking that the referenced user in the token still exists.
+  - The existing `CreateUserRequest`/`UpdateUserRequest` schema did not require a password, so I have added this to support the auth flow properly.
+
+
+### Plan for tomorrow
+- [x] Review `openapi.yaml` path by path and confirm the user/account/transaction flows
+- [x] Decide and document the auth endpoint contract for `POST /v1/auth/login`
+- [ ] Scaffold the actual project structure for the FastAPI application
+- [ ] Set up FastAPI app entrypoint, config, and SQLAlchemy database session
+- [ ] Build user schemas, model, service, and router together as the first full vertical slice
+- [ ] Add the core user error scenarios and tests
+- [ ] If time allows, start the account layer after the user/auth path is working cleanly
+
+### Commit plan
+- [ ] Commit scaffold: app structure, config, dependency wiring
+- [ ] Commit auth contract: update `openapi.yaml` with login endpoint
+- [ ] Commit user vertical slice: model, schemas, service, router
+- [ ] Commit user tests and error handling
+- [ ] Commit account vertical slice once user/auth is stable
+
+### Completed Today
+- [x] Set up git repo and planning/admin files
+- [ ] Scaffold project structure
+
+
+## Questions / things I want to clear up
 - [x] Create a TODO list of all scenarios in a clean format, so it is easy to show what I have and have not implemented
-- [ ] Update the OpenAPI spec with the details of the auth endpoint I implement
+- [x] Update the OpenAPI spec with the details of the auth endpoint I implement
 - [x] Understand JWT properly at a high level: it is an auth token passed by the client, somewhat similar in purpose to a browser cookie, but implemented differently
 - [x] Confirm what should happen if protected endpoints are called without authenticating first
 - [ ] Decide what extra work best demonstrates ability beyond the minimum expected scope
 
-### Test / error handling mindset
+## Test / error handling mindset
 - I want each main area to have both success-path tests and failure-path tests.
 - I want to be able to explain not just the endpoint itself, but also the validation, ownership checks, and auth checks around it.
 - If they ask me to extend the project later, I want the existing structure to make that feel natural rather than bolted on.
-
-### Completed Today
-- [x] Understood requirements
-- [x] Worked with GPT to understand the available tech stack options and pick a direction
-- [ ] Scaffold project structure + git repo 

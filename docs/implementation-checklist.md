@@ -20,7 +20,7 @@ The aim is to cover at least one of each CRUD-style operation across the main el
 
 - [x] ★ Confirm final stack and repo structure
 - [ ] ★ Review `openapi.yaml` in full
-- [ ] ★ Define auth endpoint and update OpenAPI spec
+- [x] ★ Define auth endpoint and update OpenAPI spec
 - [ ] ★ Set up app scaffold, config, and database session
 - [ ] ★ Set up test structure
 
