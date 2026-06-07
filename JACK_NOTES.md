@@ -112,7 +112,7 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
   - I still like the idea of checking that the referenced user in the token still exists.
   - The existing `CreateUserRequest`/`UpdateUserRequest` schema did not require a password, so I have added this to support the auth flow properly.
 
-### Configuring FastAPI
+### 11:00 Configuring FastAPI
 - I now have the first application scaffold in place, and this is how I am thinking about the structure:
   - `app/main.py`
     - FastAPI entrypoint. This creates the app, registers exception handlers, and includes routers.
@@ -134,16 +134,38 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
     - API and service tests once I start building out the actual behaviour.
 - I used AI here to help create the initial scaffold and boilerplate, but I still need to review and understand each part of the structure before building further on top of it.
 
+### 12:00 Building out the User endpoint
+- I do want to be explicit that I have used AI to help with scaffolding, boilerplate, and some of the repetitive setup work in this project.
+- I do not think that is a problem for this task, because the brief allows AI assistance and I am not trying to pass off code I do not understand.
+- The important line for me is that if I commit the code, I need to understand what it is doing and be able to explain it in review.
+- My aim is to use AI to save time on setup and repetitive structure, then spend my own time understanding, reviewing, and shaping the code into something I can defend properly.
 
-
+### 20:00 Testing
+- `conftest.py` is set up to provide a temporary test database, so my real local development database is not affected. This is important both for protecting local data and for keeping the tests repeatable.
+- `test_user_auth.py` currently contains tests for:
+  - creating a user
+  - logging in successfully
+  - rejecting invalid login credentials
+  - fetching the authenticated user's own record
+  - rejecting unauthenticated access
+  - rejecting access to another user's record
+- Each test will follow a similar structure too:
+    1. What setup data is created? 
+    2. What API call is made? 
+    3. What status code is expected? 
+    4. What JSON body is expected? 
+    5. What rule does this prove? 
+- I expect this to scale cleanly, and later I can add `tests/test_accounts.py` and `tests/test_transactions.py` and reuse `conftest.py`. 
+- I noticed that some response codes are documented in the route decorators for completeness and alignment with the API contract, even where they are not all raised explicitly in the route body itself.
+- I need to stay aware of where each response actually comes from: route logic, dependencies, validation handlers, or unexpected failures.
 
 ### Plan for tomorrow
 - [x] Review `openapi.yaml` path by path and confirm the user/account/transaction flows
 - [x] Decide and document the auth endpoint contract for `POST /v1/auth/login`
 - [x] Scaffold the actual project structure for the FastAPI application
 - [x] Set up FastAPI app entrypoint, config, and SQLAlchemy database session
-- [ ] Build user schemas, model, service, and router together as the first full vertical slice
-- [ ] Add the core user error scenarios and tests
+- [x] Build user schemas, model, service, and router together as the first full vertical slice
+- [x] Add the core user error scenarios and tests
 - [ ] If time allows, start the account layer after the user/auth path is working cleanly
 
 ### Commit plan
@@ -159,6 +181,8 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
 - [x] Set up FastAPI app entrypoint, config, and SQLAlchemy database session
 - [x] Add a first auth route and health route
 - [x] Get the scaffold running locally with `/health` and `/docs`
+- [x] Build the first working user/auth flow end to end
+- [x] Add an initial pytest setup with passing user/auth tests
 
 
 ## Questions / things I want to clear up

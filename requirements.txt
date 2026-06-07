@@ -3,7 +3,5 @@ uvicorn
 sqlalchemy
 pydantic
 python-jose
-passlib
-bcrypt
 pytest
 httpx

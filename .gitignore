@@ -13,4 +13,6 @@ build/
 *.py[cod]
 *.sqlite3
 *.db
+*.db-journal
+*.sqlite3-journal
 Take Home coding test v2.pdf

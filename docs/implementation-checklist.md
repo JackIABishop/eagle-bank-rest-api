@@ -22,26 +22,26 @@ The aim is to cover at least one of each CRUD-style operation across the main el
 - [ ] ★ Review `openapi.yaml` in full
 - [x] ★ Define auth endpoint and update OpenAPI spec
 - [x] ★ Set up app scaffold, config, and database session
-- [ ] ★ Set up test structure
+- [x] ★ Set up test structure
 
 ## User
 
-- [ ] ★ Create user
-- [ ] ★ Fetch own user
+- [x] ★ Create user
+- [x] ★ Fetch own user
 - [ ] Update own user
 - [ ] Delete own user
-- [ ] ★ Handle validation errors
-- [ ] ★ Handle unauthenticated access
-- [ ] ★ Handle forbidden access to another user's record
-- [ ] ★ Handle non-existent user
-- [ ] ★ Add tests for user flows
+- [x] ★ Handle validation errors
+- [x] ★ Handle unauthenticated access
+- [x] ★ Handle forbidden access to another user's record
+- [x] ★ Handle non-existent user
+- [x] ★ Add tests for user flows
 
 ## Authentication
 
 - [x] ★ Implement login endpoint
 - [x] ★ Return JWT bearer token
-- [ ] ★ Reject invalid credentials
-- [ ] Add tests for authentication flows
+- [x] ★ Reject invalid credentials
+- [x] Add tests for authentication flows
 
 ## Account
 
@@ -72,6 +72,6 @@ The aim is to cover at least one of each CRUD-style operation across the main el
 ## Submission
 
 - [ ] Write README properly
-- [x] Review `JACK_NOTES.md`
-- [x] ★ Review commit structure
+- [ ] Review `JACK_NOTES.md`
+- [ ] ★ Review commit structure
 - [ ] ★ Prepare walkthrough talking points

@@ -47,8 +47,17 @@ Once it is running, the main URLs are:
 - `http://127.0.0.1:8000/health`
 - `http://127.0.0.1:8000/docs`
 
+## Run Tests
+
+Run the current test suite with:
+
+```bash
+pytest
+```
+
 ## Notes
 
+- AI assistance was used to accelerate scaffolding and boilerplate during this take-home. I reviewed the generated code, aligned it to the API contract, and treated it as a starting point rather than something to trust blindly.
 - SQLite is file-based, so there is no separate database server to start.
 - `openapi.yaml` is the API contract for the implementation.
 - As the application structure is built out, this README should be updated with the exact run and test commands for the project.

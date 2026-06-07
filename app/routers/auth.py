@@ -6,12 +6,21 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.db import get_db
 from app.schemas.auth import AuthTokenResponse, LoginRequest
+from app.schemas.common import BadRequestErrorResponse, ErrorResponse
 from app.services.auth import authenticate_user, create_access_token
 
 router = APIRouter(prefix="/v1/auth", tags=["auth"])
 
 
-@router.post("/login", response_model=AuthTokenResponse)
+@router.post(
+    "/login",
+    response_model=AuthTokenResponse,
+    responses={
+        400: {"model": BadRequestErrorResponse, "description": "Invalid details supplied"},
+        401: {"model": ErrorResponse, "description": "Email or password is incorrect"},
+        500: {"model": ErrorResponse, "description": "An unexpected error occurred"},
+    },
+)
 def login_user(payload: LoginRequest, db: Session = Depends(get_db)) -> AuthTokenResponse:
     """Authenticate a user with email and password and issue a JWT."""
 
