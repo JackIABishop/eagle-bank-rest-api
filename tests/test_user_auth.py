@@ -2,22 +2,9 @@ from __future__ import annotations
 
 import pytest
 
-pytestmark = pytest.mark.anyio
+from tests.helpers import create_user_payload
 
-# Default test data 
-def create_user_payload(email: str = "user@example.com") -> dict:
-    return {
-        "name": "Test User",
-        "address": {
-            "line1": "1 High Street",
-            "town": "Knutsford",
-            "county": "Cheshire",
-            "postcode": "WA16 6AA",
-        },
-        "phoneNumber": "+447700900123",
-        "email": email,
-        "password": "correct-horse-battery",
-    }
+pytestmark = pytest.mark.anyio
 
 
 async def test_create_user_returns_201_and_user_shape(client) -> None:

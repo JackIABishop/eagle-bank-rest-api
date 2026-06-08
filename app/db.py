@@ -14,7 +14,9 @@ class Base(DeclarativeBase):
 
 engine = create_engine(
     settings.database_url,
-    connect_args={"check_same_thread": False}
+    # SQLite is file-based, so brief GUI inspection or reload overlap can
+    # temporarily lock the file. A timeout makes startup a bit more forgiving.
+    connect_args={"check_same_thread": False, "timeout": 30}
     if settings.database_url.startswith("sqlite")
     else {},
 )

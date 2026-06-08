@@ -159,38 +159,64 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
 - I noticed that some response codes are documented in the route decorators for completeness and alignment with the API contract, even where they are not all raised explicitly in the route body itself.
 - I need to stay aware of where each response actually comes from: route logic, dependencies, validation handlers, or unexpected failures.
 
-### Plan for tomorrow
-- [x] Review `openapi.yaml` path by path and confirm the user/account/transaction flows
-- [x] Decide and document the auth endpoint contract for `POST /v1/auth/login`
-- [x] Scaffold the actual project structure for the FastAPI application
-- [x] Set up FastAPI app entrypoint, config, and SQLAlchemy database session
-- [x] Build user schemas, model, service, and router together as the first full vertical slice
-- [x] Add the core user error scenarios and tests
-- [ ] If time allows, start the account layer after the user/auth path is working cleanly
+## 8th June 2026
+### 19:00 Accounts
+- It would be nice to have a UI to interact with this API - make that is take home test 2! 
+- Using Swagger UI to test database outside of the `tests/`
+- I used the account area as my demonstration of the more complete REST flow, because by this point I already had the user/auth foundations in place and wanted to show I could extend the structure consistently.
+- I now have:
+  - an account model
+  - account request/response schemas
+  - an account service layer
+  - account routes for create, list, fetch, update, and delete
+  - account tests covering both happy paths and important error cases
+- The shape is intentionally the same as the user slice:
+  - `models/` for database structure
+  - `schemas/` for Pydantic request/response validation
+  - `services/` for business logic
+  - `routers/` for the HTTP layer and status codes
+- That matters because I do not want each area of the API to look like it was built by a different person. I want one repeatable pattern I can explain and extend.
+- The account table links back to the authenticated user via `user_id`, so ownership checks are a core part of this slice.
+- The main rules in the router are:
+  - create account for the authenticated user
+  - list only the authenticated user's accounts
+  - fetch only your own account
+  - update only your own account
+  - delete only your own account
+- The tests for accounts currently cover:
+  - create account
+  - list only the authenticated user's accounts
+  - fetch own account
+  - reject access to another user's account
+  - update account
+  - delete account
+  - reject unauthenticated access
+  - return `404` for a missing account
+- For the tests, I created a `helpers.py` for common test functions such as `create_user_payload()` - with the idea that this file is maintained for simple functions to reduce complex dependency between tests. 
+- I like this as a demonstration area because it shows the full route pattern more clearly than the user slice currently does, since user update/delete are still de-prioritised.
+- One gap I want to keep visible is account deletion once transactions exist.
+- The brief / OpenAPI definitely says transactions can be created and retrieved but not modified or deleted.
+- It does not explicitly say "do not delete an account if it has transactions", so I am treating that as a follow-up business rule rather than pretending it is already fully specified.
+- My instinct is that once the transaction layer is in place, account delete should probably return a conflict instead of hard-deleting an account with history.
 
-### Commit plan
-- [ ] Commit scaffold: app structure, config, dependency wiring
-- [ ] Commit auth contract: update `openapi.yaml` with login endpoint
-- [ ] Commit user vertical slice: model, schemas, service, router
-- [ ] Commit user tests and error handling
-- [ ] Commit account vertical slice once user/auth is stable
+### 20:40 SQLite lock issue
+- I hit a local development issue here rather than an API design issue: `sqlite3.OperationalError: database is locked`.
+- The cause turned out not to be the account code itself, but the fact that I had `DB Browser for SQLite` open against the local `eagle_bank.db` file while Uvicorn was starting up.
+- That meant SQLite could not create the new `bank_accounts` table at startup.
+- Two useful takeaways from that:
+  - SQLite is simple and good for a take-home, but because it is file-based I need to be aware of local tooling holding locks on the file.
+  - I should treat the database viewer as an inspection tool, not something to leave attached while the app is trying to create tables or write data.
+- The app startup was also improved so table creation happens on application startup rather than at import time, which is cleaner and helped keep the test environment isolated from the real local database.
 
-### Completed Today
-- [x] Set up git repo and planning/admin files
-- [x] Scaffold project structure
-- [x] Set up FastAPI app entrypoint, config, and SQLAlchemy database session
-- [x] Add a first auth route and health route
-- [x] Get the scaffold running locally with `/health` and `/docs`
-- [x] Build the first working user/auth flow end to end
-- [x] Add an initial pytest setup with passing user/auth tests
-
-
-## Questions / things I want to clear up
-- [x] Create a TODO list of all scenarios in a clean format, so it is easy to show what I have and have not implemented
-- [x] Update the OpenAPI spec with the details of the auth endpoint I implement
-- [x] Understand JWT properly at a high level: it is an auth token passed by the client, somewhat similar in purpose to a browser cookie, but implemented differently
-- [x] Confirm what should happen if protected endpoints are called without authenticating first
-- [ ] Decide what extra work best demonstrates ability beyond the minimum expected scope
+### 21:00 Current state
+- I now have a working FastAPI application with:
+  - user creation
+  - login with JWT bearer auth
+  - fetch own user
+  - full account slice: create, list, fetch, update, delete
+  - pytest coverage for the current user/auth and account flows
+- The project is now beyond the initial scaffold stage and into meaningful feature coverage.
+- Swagger UI at `/docs` is now a useful way to demonstrate and manually test the current implementation.
 
 ## Test / error handling mindset
 - I want each main area to have both success-path tests and failure-path tests.

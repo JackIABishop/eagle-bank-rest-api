@@ -45,16 +45,16 @@ The aim is to cover at least one of each CRUD-style operation across the main el
 
 ## Account
 
-- [ ] ★ Create account
-- [ ] List own accounts
-- [ ] ★ Fetch own account
-- [ ] Update own account
-- [ ] Delete own account
+- [x] ★ Create account
+- [x] List own accounts
+- [x] ★ Fetch own account
+- [x] Update own account
+- [x] Delete own account
 - [ ] ★ Handle validation errors
-- [ ] ★ Handle unauthenticated access
-- [ ] ★ Handle forbidden access to another user's account
-- [ ] ★ Handle non-existent account
-- [ ] Add tests for account flows
+- [x] ★ Handle unauthenticated access
+- [x] ★ Handle forbidden access to another user's account
+- [x] ★ Handle non-existent account
+- [x] Add tests for account flows
 
 ## Transaction
 
