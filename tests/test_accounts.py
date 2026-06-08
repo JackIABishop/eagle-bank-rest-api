@@ -127,3 +127,56 @@ async def test_update_account_returns_404_for_missing_account(client) -> None:
 
     assert response.status_code == 404
     assert response.json() == {"message": "Bank account was not found"}
+
+
+async def test_create_account_returns_400_when_name_is_missing(client) -> None:
+    await client.post("/v1/users", json=create_user_payload("validation-create@example.com"))
+    headers = await login_and_get_headers(client, "validation-create@example.com")
+
+    response = await client.post(
+        "/v1/accounts",
+        json={"accountType": "personal"},
+        headers=headers,
+    )
+
+    assert response.status_code == 400
+    assert response.json()["message"] == "Invalid details supplied"
+
+
+async def test_create_account_returns_400_for_invalid_account_type(client) -> None:
+    await client.post("/v1/users", json=create_user_payload("validation-type@example.com"))
+    headers = await login_and_get_headers(client, "validation-type@example.com")
+
+    response = await client.post(
+        "/v1/accounts",
+        json={"name": "Business Account", "accountType": "business"},
+        headers=headers,
+    )
+
+    assert response.status_code == 400
+    assert response.json()["message"] == "Invalid details supplied"
+
+
+async def test_fetch_account_returns_400_for_invalid_account_number_format(client) -> None:
+    await client.post("/v1/users", json=create_user_payload("validation-fetch@example.com"))
+    headers = await login_and_get_headers(client, "validation-fetch@example.com")
+
+    response = await client.get("/v1/accounts/not-an-account", headers=headers)
+
+    assert response.status_code == 400
+    assert response.json()["message"] == "Invalid details supplied"
+
+
+async def test_update_account_returns_400_for_invalid_account_type(client) -> None:
+    await client.post("/v1/users", json=create_user_payload("validation-update@example.com"))
+    headers = await login_and_get_headers(client, "validation-update@example.com")
+    created_account = await create_account_via_api(client, headers)
+
+    response = await client.patch(
+        f"/v1/accounts/{created_account['accountNumber']}",
+        json={"accountType": "business"},
+        headers=headers,
+    )
+
+    assert response.status_code == 400
+    assert response.json()["message"] == "Invalid details supplied"

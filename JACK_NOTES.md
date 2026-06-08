@@ -5,7 +5,8 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
 
 ## Total Time taken: 
 ### 6th June: 2h 30m
-### 7th June: 
+### 7th June: 4h
+### 8th June: 2h 
 
 
 

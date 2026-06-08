@@ -50,7 +50,7 @@ The aim is to cover at least one of each CRUD-style operation across the main el
 - [x] ★ Fetch own account
 - [x] Update own account
 - [x] Delete own account
-- [ ] ★ Handle validation errors
+- [x] ★ Handle validation errors
 - [x] ★ Handle unauthenticated access
 - [x] ★ Handle forbidden access to another user's account
 - [x] ★ Handle non-existent account

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
 from sqlalchemy.orm import Session
 
 from app.db import get_db
@@ -24,6 +26,9 @@ from app.services.account import (
 )
 
 router = APIRouter(prefix="/v1/accounts", tags=["account"])
+# Mirror the OpenAPI contract so invalid account numbers fail validation
+# before the route logic attempts a lookup.
+AccountNumberPath = Annotated[str, Path(pattern=r"^01\d{6}$")]
 
 
 @router.post(
@@ -78,7 +83,7 @@ def list_accounts_route(
     },
 )
 def fetch_account_by_number(
-    account_number: str,
+    account_number: AccountNumberPath,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> BankAccountResponse:
@@ -110,7 +115,7 @@ def fetch_account_by_number(
     },
 )
 def update_account_by_number(
-    account_number: str,
+    account_number: AccountNumberPath,
     payload: UpdateBankAccountRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -143,7 +148,7 @@ def update_account_by_number(
     },
 )
 def delete_account_by_number(
-    account_number: str,
+    account_number: AccountNumberPath,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> Response:
