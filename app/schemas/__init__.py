@@ -6,7 +6,7 @@ from app.schemas.account import (
 )
 from app.schemas.auth import AuthTokenResponse, LoginRequest
 from app.schemas.common import BadRequestErrorResponse, ErrorResponse
-from app.schemas.transaction import CreateTransactionRequest, TransactionResponse
+from app.schemas.transaction import CreateTransactionRequest, ListTransactionsResponse, TransactionResponse
 from app.schemas.user import CreateUserRequest, UserResponse
 
 __all__ = [
@@ -19,6 +19,7 @@ __all__ = [
     "BadRequestErrorResponse",
     "CreateTransactionRequest",
     "ErrorResponse",
+    "ListTransactionsResponse",
     "TransactionResponse",
     "CreateUserRequest",
     "UserResponse",

@@ -5,6 +5,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 TRANSACTION_TYPE_PATTERN = r"^(deposit|withdrawal)$"
+TRANSACTION_ID_PATTERN = r"^tan-[A-Za-z0-9]+$"
 
 
 class CreateTransactionRequest(BaseModel):
@@ -17,10 +18,14 @@ class CreateTransactionRequest(BaseModel):
 
 
 class TransactionResponse(BaseModel):
-    id: str = Field(pattern=r"^tan-[A-Za-z0-9]+$")
+    id: str = Field(pattern=TRANSACTION_ID_PATTERN)
     amount: float
     currency: str
     type: str
     reference: str | None = None
     userId: str
     createdTimestamp: datetime
+
+
+class ListTransactionsResponse(BaseModel):
+    transactions: list[TransactionResponse]

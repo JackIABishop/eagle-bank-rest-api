@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.models.account import BankAccount
 from app.models.transaction import Transaction
 from app.models.user import User
-from app.schemas.transaction import CreateTransactionRequest, TransactionResponse
+from app.schemas.transaction import CreateTransactionRequest, ListTransactionsResponse, TransactionResponse
 
 DEPOSIT_TRANSACTION_TYPE = "deposit"
 WITHDRAWAL_TRANSACTION_TYPE = "withdrawal"
@@ -71,4 +71,30 @@ def serialise_transaction(transaction: Transaction) -> TransactionResponse:
         reference=transaction.reference,
         userId=transaction.user_id,
         createdTimestamp=transaction.created_timestamp,
+    )
+
+
+def list_transactions_for_account(db: Session, account: BankAccount) -> list[Transaction]:
+    return (
+        db.query(Transaction)
+        .filter(Transaction.account_number == account.account_number)
+        .order_by(Transaction.created_timestamp.asc(), Transaction.id.asc())
+        .all()
+    )
+
+
+def get_transaction_for_account(db: Session, account: BankAccount, transaction_id: str) -> Transaction | None:
+    return (
+        db.query(Transaction)
+        .filter(
+            Transaction.account_number == account.account_number,
+            Transaction.id == transaction_id,
+        )
+        .first()
+    )
+
+
+def serialise_transaction_list(transactions: list[Transaction]) -> ListTransactionsResponse:
+    return ListTransactionsResponse(
+        transactions=[serialise_transaction(transaction) for transaction in transactions]
     )
