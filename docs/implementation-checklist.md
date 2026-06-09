@@ -73,7 +73,7 @@ The aim is to cover at least one of each CRUD-style operation across the main el
 
 ## Submission
 
-- [ ] Write README properly
-- [ ] Review `JACK_NOTES.md`
-- [ ] ★ Review commit structure
+- [x] Write README properly
+- [x] Review `JACK_NOTES.md`
+- [x] ★ Review commit structure
 - [ ] ★ Prepare walkthrough talking points

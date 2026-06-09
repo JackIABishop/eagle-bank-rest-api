@@ -429,7 +429,7 @@ paths:
           required: true
           schema:
             type: string
-            pattern: ^tan-[A-Za-z0-9]$
+            pattern: ^tan-[A-Za-z0-9]+$
       security:
         - bearerAuth: []
       responses:
@@ -533,7 +533,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         '403':
-          description: The user is not allowed to access the transaction
+          description: The user is not allowed to access the user details
           content:
             application/json:
               schema:
@@ -592,7 +592,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         '403':
-          description: The user is not allowed to access the transaction
+          description: The user is not allowed to update the user details
           content:
             application/json:
               schema:
@@ -646,7 +646,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         '403':
-          description: The user is not allowed to access the transaction
+          description: The user is not allowed to delete the user
           content:
             application/json:
               schema:
@@ -795,7 +795,7 @@ components:
       properties:
         id: 
           type: string
-          pattern: ^tan-[A-Za-z0-9]$
+          pattern: ^tan-[A-Za-z0-9]+$
           examples:
             - tan-123abc
         amount:

@@ -94,3 +94,37 @@ async def test_fetch_other_user_returns_403(client) -> None:
 
     assert response.status_code == 403
     assert response.json() == {"message": "The user is not allowed to access the user details"}
+
+
+async def test_fetch_user_returns_404_for_missing_user(client) -> None:
+    await client.post("/v1/users", json=create_user_payload())
+    login_response = await client.post(
+        "/v1/auth/login",
+        json={"email": "user@example.com", "password": "correct-horse-battery"},
+    )
+    token = login_response.json()["accessToken"]
+
+    response = await client.get(
+        "/v1/users/usr-missing",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {"message": "User was not found"}
+
+
+async def test_fetch_user_returns_400_for_invalid_user_id_format(client) -> None:
+    await client.post("/v1/users", json=create_user_payload())
+    login_response = await client.post(
+        "/v1/auth/login",
+        json={"email": "user@example.com", "password": "correct-horse-battery"},
+    )
+    token = login_response.json()["accessToken"]
+
+    response = await client.get(
+        "/v1/users/not-a-user-id",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 400
+    assert response.json()["message"] == "Invalid details supplied"

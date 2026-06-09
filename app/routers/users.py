@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Path, status
 from sqlalchemy.orm import Session
 
 from app.db import get_db
@@ -11,6 +13,7 @@ from app.schemas.user import CreateUserRequest, UserResponse
 from app.services.user import create_user, serialise_user
 
 router = APIRouter(prefix="/v1/users", tags=["user"])
+UserIdPath = Annotated[str, Path(pattern=r"^usr-[A-Za-z0-9]+$")]
 
 
 @router.post(
@@ -48,7 +51,7 @@ def create_user_route(payload: CreateUserRequest, db: Session = Depends(get_db))
     },
 )
 def fetch_user_by_id(
-    user_id: str,
+    user_id: UserIdPath,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> UserResponse:
