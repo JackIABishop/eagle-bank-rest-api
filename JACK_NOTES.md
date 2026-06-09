@@ -219,6 +219,33 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
 - The project is now beyond the initial scaffold stage and into meaningful feature coverage.
 - Swagger UI at `/docs` is now a useful way to demonstrate and manually test the current implementation.
 
+## 9th June 2026
+### Final night priorities
+- I only have one proper evening left for implementation, so I need to be disciplined about what adds the most value.
+- The best remaining work is the transaction slice:
+  - [x] create deposit
+  - [x] create withdrawal
+  - [x] reject insufficient funds with `422`
+  - [ ] list transactions
+  - [ ] fetch a specific transaction
+- I think this is the right use of the remaining time because it completes the core banking behaviour far better than spending the last night polishing lower-value CRUD edges.
+- It also gives me a better interview story -- because insufficient funds and transaction history are more meaningful business rules than simply adding more endpoint coverage for the sake of it.
+
+### Transaction slice
+- Building the first transaction scenarios felt relatively straightforward once the user/auth/account structure was already in place.
+- The main thing I needed to stay careful about was following the OpenAPI contract properly rather than improvising:
+  - the permitted transaction types
+  - the minimum / maximum amount rules
+  - the `422` insufficient-funds case
+- This is one of the clearer examples of why the earlier scaffold and layering work mattered. Once the account ownership and database patterns were already there, I could add the transaction create flow without inventing a new structure.
+
+### Debugging through VS Code
+- I have been using the FastAPI debug configuration in VS Code to run the service under the debugger and hit breakpoints from Swagger UI.
+- My current debugging options now feel like:
+  - Swagger UI + temporary `print()` statements for quick manual debugging
+  - tests for repeatable behaviour checks
+  - FastAPI debug configuration in VS Code when I want to step through the code line by line
+
 ## Test / error handling mindset
 - I want each main area to have both success-path tests and failure-path tests.
 - I want to be able to explain not just the endpoint itself, but also the validation, ownership checks, and auth checks around it.

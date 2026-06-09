@@ -58,9 +58,9 @@ The aim is to cover at least one of each CRUD-style operation across the main el
 
 ## Transaction
 
-- [ ] ★ Create deposit transaction
-- [ ] ★ Create withdrawal transaction
-- [ ] ★ Reject withdrawal with insufficient funds
+- [x] ★ Create deposit transaction
+- [x] ★ Create withdrawal transaction
+- [x] ★ Reject withdrawal with insufficient funds
 - [ ] List account transactions
 - [ ] ★ Fetch specific transaction
 - [ ] ★ Handle validation errors

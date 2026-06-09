@@ -49,3 +49,29 @@ async def create_account_via_api(
         headers=headers,
     )
     return response.json()
+
+
+async def create_transaction_via_api(
+    client,
+    account_number: str,
+    headers: dict[str, str],
+    *,
+    amount: float,
+    transaction_type: str,
+    currency: str = "GBP",
+    reference: str | None = None,
+) -> dict:
+    payload = {
+        "amount": amount,
+        "currency": currency,
+        "type": transaction_type,
+    }
+    if reference is not None:
+        payload["reference"] = reference
+
+    response = await client.post(
+        f"/v1/accounts/{account_number}/transactions",
+        json=payload,
+        headers=headers,
+    )
+    return response.json()
