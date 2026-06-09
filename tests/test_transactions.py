@@ -86,3 +86,62 @@ async def test_create_withdrawal_returns_422_for_insufficient_funds(client) -> N
 
     assert response.status_code == 422
     assert response.json() == {"message": "Insufficient funds to process transaction"}
+
+
+async def test_create_transaction_returns_403_for_another_users_account(client) -> None:
+    await client.post("/v1/users", json=create_user_payload("transaction-owner@example.com"))
+    await client.post("/v1/users", json=create_user_payload("other-user@example.com"))
+    owner_headers = await login_and_get_headers(client, "transaction-owner@example.com")
+    other_headers = await login_and_get_headers(client, "other-user@example.com")
+    account = await create_account_via_api(client, owner_headers)
+
+    response = await client.post(
+        f"/v1/accounts/{account['accountNumber']}/transactions",
+        json={
+            "amount": 10.00,
+            "currency": "GBP",
+            "type": "deposit",
+            "reference": "Wrong owner",
+        },
+        headers=other_headers,
+    )
+
+    assert response.status_code == 403
+    assert response.json() == {"message": "The user is not allowed to delete the bank account details"}
+
+
+async def test_create_transaction_returns_404_for_missing_account(client) -> None:
+    await client.post("/v1/users", json=create_user_payload("missing-transaction-account@example.com"))
+    headers = await login_and_get_headers(client, "missing-transaction-account@example.com")
+
+    response = await client.post(
+        "/v1/accounts/01000000/transactions",
+        json={
+            "amount": 10.00,
+            "currency": "GBP",
+            "type": "deposit",
+            "reference": "Missing account",
+        },
+        headers=headers,
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {"message": "Bank account was not found"}
+
+
+async def test_create_transaction_returns_400_when_required_data_is_missing(client) -> None:
+    await client.post("/v1/users", json=create_user_payload("missing-transaction-data@example.com"))
+    headers = await login_and_get_headers(client, "missing-transaction-data@example.com")
+    account = await create_account_via_api(client, headers)
+
+    response = await client.post(
+        f"/v1/accounts/{account['accountNumber']}/transactions",
+        json={
+            "currency": "GBP",
+            "type": "deposit",
+        },
+        headers=headers,
+    )
+
+    assert response.status_code == 400
+    assert response.json()["message"] == "Invalid details supplied"
