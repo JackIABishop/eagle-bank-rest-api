@@ -15,7 +15,7 @@ from app.schemas.transaction import (
     TRANSACTION_ID_PATTERN,
     TransactionResponse,
 )
-from app.services.account import get_account_by_number
+from app.services.account import get_owned_account_or_raise
 from app.services.transaction import (
     create_transaction,
     get_transaction_for_account,
@@ -50,15 +50,12 @@ def create_transaction_route(
 ) -> TransactionResponse:
     """Create a deposit or withdrawal on an owned bank account."""
 
-    account = get_account_by_number(db, account_number)
-    if account is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bank account was not found")
-
-    if account.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="The user is not allowed to delete the bank account details",
-        )
+    account = get_owned_account_or_raise(
+        db,
+        account_number,
+        current_user,
+        forbidden_detail="The user is not allowed to delete the bank account details",
+    )
 
     transaction = create_transaction(db, account, current_user, payload)
     return serialise_transaction(transaction)
@@ -82,15 +79,12 @@ def list_transactions_route(
 ) -> ListTransactionsResponse:
     """List transactions for an owned bank account."""
 
-    account = get_account_by_number(db, account_number)
-    if account is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bank account was not found")
-
-    if account.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="The user is not allowed to access the transactions",
-        )
+    account = get_owned_account_or_raise(
+        db,
+        account_number,
+        current_user,
+        forbidden_detail="The user is not allowed to access the transactions",
+    )
 
     transactions = list_transactions_for_account(db, account)
     return serialise_transaction_list(transactions)
@@ -115,15 +109,12 @@ def fetch_transaction_by_id_route(
 ) -> TransactionResponse:
     """Fetch a specific transaction for an owned bank account."""
 
-    account = get_account_by_number(db, account_number)
-    if account is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bank account was not found")
-
-    if account.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="The user is not allowed to access the transaction",
-        )
+    account = get_owned_account_or_raise(
+        db,
+        account_number,
+        current_user,
+        forbidden_detail="The user is not allowed to access the transaction",
+    )
 
     transaction = get_transaction_for_account(db, account, transaction_id)
     if transaction is None:

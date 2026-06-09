@@ -18,7 +18,7 @@ from app.schemas.common import BadRequestErrorResponse, ErrorResponse
 from app.services.account import (
     create_account,
     delete_account,
-    get_account_by_number,
+    get_owned_account_or_raise,
     list_accounts_for_user,
     serialise_account,
     serialise_account_list,
@@ -89,16 +89,12 @@ def fetch_account_by_number(
 ) -> BankAccountResponse:
     """Fetch a single bank account owned by the authenticated user."""
 
-    account = get_account_by_number(db, account_number)
-    if account is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bank account was not found")
-
-    # Ownership is checked after lookup so a valid token cannot read another customer's account.
-    if account.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="The user is not allowed to access the bank account details",
-        )
+    account = get_owned_account_or_raise(
+        db,
+        account_number,
+        current_user,
+        forbidden_detail="The user is not allowed to access the bank account details",
+    )
 
     return serialise_account(account)
 
@@ -122,15 +118,12 @@ def update_account_by_number(
 ) -> BankAccountResponse:
     """Update a bank account owned by the authenticated user."""
 
-    account = get_account_by_number(db, account_number)
-    if account is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bank account was not found")
-
-    if account.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="The user is not allowed to update the bank account details",
-        )
+    account = get_owned_account_or_raise(
+        db,
+        account_number,
+        current_user,
+        forbidden_detail="The user is not allowed to update the bank account details",
+    )
 
     updated_account = update_account(db, account, payload)
     return serialise_account(updated_account)
@@ -154,15 +147,12 @@ def delete_account_by_number(
 ) -> Response:
     """Delete a bank account owned by the authenticated user."""
 
-    account = get_account_by_number(db, account_number)
-    if account is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bank account was not found")
-
-    if account.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="The user is not allowed to delete the bank account details",
-        )
+    account = get_owned_account_or_raise(
+        db,
+        account_number,
+        current_user,
+        forbidden_detail="The user is not allowed to delete the bank account details",
+    )
 
     # TODO: Once transactions exist, revisit whether this should return 409
     # instead of hard-deleting the account to preserve transaction history.

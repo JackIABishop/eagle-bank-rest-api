@@ -226,8 +226,8 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
   - [x] create deposit
   - [x] create withdrawal
   - [x] reject insufficient funds with `422`
-  - [ ] list transactions
-  - [ ] fetch a specific transaction
+  - [x] list transactions
+  - [x] fetch a specific transaction
 - I think this is the right use of the remaining time because it completes the core banking behaviour far better than spending the last night polishing lower-value CRUD edges.
 - It also gives me a better interview story -- because insufficient funds and transaction history are more meaningful business rules than simply adding more endpoint coverage for the sake of it.
 
@@ -237,6 +237,7 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
   - the permitted transaction types
   - the minimum / maximum amount rules
   - the `422` insufficient-funds case
+  - ownership and not-found behaviour on the new list / fetch routes
 - This is one of the clearer examples of why the earlier scaffold and layering work mattered. Once the account ownership and database patterns were already there, I could add the transaction create flow without inventing a new structure.
 
 ### Debugging through VS Code
@@ -245,6 +246,16 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
   - Swagger UI + temporary `print()` statements for quick manual debugging
   - tests for repeatable behaviour checks
   - FastAPI debug configuration in VS Code when I want to step through the code line by line
+
+### Authentication and correct account refactor
+- I noticed the same account lookup + ownership check pattern repeated across both the account routes and the transaction routes.
+- Because the behaviour is the same each time -- fetch the account, return `404` if it does not exist, return `403` if it does not belong to the authenticated user -- I think it is cleaner to centralise that in one helper rather than keep copying it.
+- My aim with this refactor is to:
+  - reduce repetition
+  - keep the `404` / `403` behaviour consistent
+  - make later account-based routes easier to add
+  - avoid having one route drift away from the others by accident
+- I still want to keep the helper simple and readable rather than hiding too much behind abstraction.
 
 ## Test / error handling mindset
 - I want each main area to have both success-path tests and failure-path tests.

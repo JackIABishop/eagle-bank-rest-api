@@ -3,6 +3,7 @@ from __future__ import annotations
 import random
 from decimal import Decimal
 
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.account import BankAccount
@@ -44,6 +45,25 @@ def create_account(db: Session, current_user: User, payload: CreateBankAccountRe
 
 def get_account_by_number(db: Session, account_number: str) -> BankAccount | None:
     return db.query(BankAccount).filter(BankAccount.account_number == account_number).first()
+
+
+def get_owned_account_or_raise(
+    db: Session,
+    account_number: str,
+    current_user: User,
+    *,
+    forbidden_detail: str,
+) -> BankAccount:
+    """Fetch an account and enforce that it belongs to the authenticated user."""
+
+    account = get_account_by_number(db, account_number)
+    if account is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bank account was not found")
+
+    if account.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=forbidden_detail)
+
+    return account
 
 
 def list_accounts_for_user(db: Session, current_user: User) -> list[BankAccount]:
