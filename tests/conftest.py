@@ -13,7 +13,7 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from app.db import Base, get_db
+from app.db import Base, configure_sqlite, get_db
 from app.main import app
 
 
@@ -27,6 +27,7 @@ async def client(tmp_path) -> Generator[httpx.AsyncClient, None, None]:
         f"sqlite:///{db_path}",
         connect_args={"check_same_thread": False},
     )
+    configure_sqlite(engine)
     TestingSessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, class_=Session)
     Base.metadata.create_all(bind=engine)
 

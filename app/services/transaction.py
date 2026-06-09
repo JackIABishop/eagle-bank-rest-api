@@ -13,6 +13,7 @@ from app.schemas.transaction import CreateTransactionRequest, ListTransactionsRe
 
 DEPOSIT_TRANSACTION_TYPE = "deposit"
 WITHDRAWAL_TRANSACTION_TYPE = "withdrawal"
+MAX_ACCOUNT_BALANCE = Decimal("10000.00")
 
 
 def _generate_transaction_id() -> str:
@@ -40,6 +41,14 @@ def create_transaction(
         )
 
     if payload.type == DEPOSIT_TRANSACTION_TYPE:
+        # The supplied OpenAPI contract caps the exposed account balance at
+        # 10,000.00, so deposits must be rejected before they push the account
+        # beyond the documented maximum.
+        if account.balance + amount > MAX_ACCOUNT_BALANCE:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Account balance cannot exceed 10000.00",
+            )
         account.balance += amount
     else:
         account.balance -= amount

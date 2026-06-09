@@ -5,6 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 from sqlalchemy.orm import Session
 
+from app.access import get_owned_account_or_raise
 from app.db import get_db
 from app.dependencies import get_current_user
 from app.models.user import User
@@ -15,7 +16,6 @@ from app.schemas.transaction import (
     TRANSACTION_ID_PATTERN,
     TransactionResponse,
 )
-from app.services.account import get_owned_account_or_raise
 from app.services.transaction import (
     create_transaction,
     get_transaction_for_account,
@@ -36,9 +36,9 @@ TransactionIdPath = Annotated[str, Path(pattern=TRANSACTION_ID_PATTERN)]
     responses={
         400: {"model": BadRequestErrorResponse, "description": "Invalid details supplied"},
         401: {"model": ErrorResponse, "description": "Access token is missing or invalid"},
-        403: {"model": ErrorResponse, "description": "The user is not allowed to delete the bank account details"},
+        403: {"model": ErrorResponse, "description": "The user is not allowed to access the transaction"},
         404: {"model": ErrorResponse, "description": "Bank account was not found"},
-        422: {"model": ErrorResponse, "description": "Insufficient funds to process transaction"},
+        422: {"model": ErrorResponse, "description": "Transaction could not be processed"},
         500: {"model": ErrorResponse, "description": "An unexpected error occurred"},
     },
 )
@@ -54,7 +54,7 @@ def create_transaction_route(
         db,
         account_number,
         current_user,
-        forbidden_detail="The user is not allowed to delete the bank account details",
+        forbidden_detail="The user is not allowed to access the transaction",
     )
 
     transaction = create_transaction(db, account, current_user, payload)

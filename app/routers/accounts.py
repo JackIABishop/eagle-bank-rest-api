@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
+from fastapi import APIRouter, Depends, Path, Response, status
 from sqlalchemy.orm import Session
 
+from app.access import get_owned_account_or_raise
 from app.db import get_db
 from app.dependencies import get_current_user
 from app.models.user import User
@@ -18,7 +19,6 @@ from app.schemas.common import BadRequestErrorResponse, ErrorResponse
 from app.services.account import (
     create_account,
     delete_account,
-    get_owned_account_or_raise,
     list_accounts_for_user,
     serialise_account,
     serialise_account_list,
@@ -137,6 +137,7 @@ def update_account_by_number(
         401: {"model": ErrorResponse, "description": "Access token is missing or invalid"},
         403: {"model": ErrorResponse, "description": "The user is not allowed to delete the bank account details"},
         404: {"model": ErrorResponse, "description": "Bank account was not found"},
+        409: {"model": ErrorResponse, "description": "Bank account cannot be deleted while transactions exist"},
         500: {"model": ErrorResponse, "description": "An unexpected error occurred"},
     },
 )
@@ -154,7 +155,5 @@ def delete_account_by_number(
         forbidden_detail="The user is not allowed to delete the bank account details",
     )
 
-    # TODO: Once transactions exist, revisit whether this should return 409
-    # instead of hard-deleting the account to preserve transaction history.
     delete_account(db, account)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

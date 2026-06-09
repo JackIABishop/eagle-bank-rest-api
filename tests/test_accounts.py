@@ -108,6 +108,31 @@ async def test_delete_account_returns_204_and_removes_the_account(client) -> Non
     assert fetch_response.status_code == 404
 
 
+async def test_delete_account_returns_409_when_transactions_exist(client) -> None:
+    await client.post("/v1/users", json=create_user_payload("account-history@example.com"))
+    headers = await login_and_get_headers(client, "account-history@example.com")
+    created_account = await create_account_via_api(client, headers)
+
+    await client.post(
+        f"/v1/accounts/{created_account['accountNumber']}/transactions",
+        json={
+            "amount": 50.00,
+            "currency": "GBP",
+            "type": "deposit",
+            "reference": "Keep history",
+        },
+        headers=headers,
+    )
+
+    response = await client.delete(
+        f"/v1/accounts/{created_account['accountNumber']}",
+        headers=headers,
+    )
+
+    assert response.status_code == 409
+    assert response.json() == {"message": "Bank account cannot be deleted while transactions exist"}
+
+
 async def test_list_accounts_returns_401_without_token(client) -> None:
     response = await client.get("/v1/accounts")
 

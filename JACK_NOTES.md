@@ -7,8 +7,7 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
 ### 6th June: 2h 30m
 ### 7th June: 4h
 ### 8th June: 2h 
-
-
+### 9th June: 2h
 
 ## 6th June 2026 
 ### 17:00 init
@@ -239,6 +238,8 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
   - the `422` insufficient-funds case
   - ownership and not-found behaviour on the new list / fetch routes
 - This is one of the clearer examples of why the earlier scaffold and layering work mattered. Once the account ownership and database patterns were already there, I could add the transaction create flow without inventing a new structure.
+- One useful hardening step after the first pass was noticing that the OpenAPI contract caps exposed account balances at `10000.00`, so deposits also need a guard for "valid transaction amount but invalid resulting balance".
+- I also tightened account deletion so it now refuses to delete an account that already has transaction history. That was not just polish: once transactions exist, hard-deleting the account would leave the model in a bad state conceptually, even if a simple demo app could get away with it.
 
 ### Debugging through VS Code
 - I have been using the FastAPI debug configuration in VS Code to run the service under the debugger and hit breakpoints from Swagger UI.
@@ -256,6 +257,7 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
   - make later account-based routes easier to add
   - avoid having one route drift away from the others by accident
 - I still want to keep the helper simple and readable rather than hiding too much behind abstraction.
+- I also prefer that helper living outside the account service itself. The account service should stay focused on account business logic, while the ownership guard is more of a reusable access-control helper used by multiple routers.
 
 ## Test / error handling mindset
 - I want each main area to have both success-path tests and failure-path tests.

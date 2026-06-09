@@ -107,7 +107,7 @@ async def test_create_transaction_returns_403_for_another_users_account(client) 
     )
 
     assert response.status_code == 403
-    assert response.json() == {"message": "The user is not allowed to delete the bank account details"}
+    assert response.json() == {"message": "The user is not allowed to access the transaction"}
 
 
 async def test_create_transaction_returns_404_for_missing_account(client) -> None:
@@ -145,6 +145,54 @@ async def test_create_transaction_returns_400_when_required_data_is_missing(clie
 
     assert response.status_code == 400
     assert response.json()["message"] == "Invalid details supplied"
+
+
+async def test_create_transaction_returns_401_without_token(client) -> None:
+    await client.post("/v1/users", json=create_user_payload("missing-token@example.com"))
+    headers = await login_and_get_headers(client, "missing-token@example.com")
+    account = await create_account_via_api(client, headers)
+
+    response = await client.post(
+        f"/v1/accounts/{account['accountNumber']}/transactions",
+        json={
+            "amount": 10.00,
+            "currency": "GBP",
+            "type": "deposit",
+            "reference": "No token",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json() == {"message": "Access token is missing or invalid"}
+
+
+async def test_create_deposit_returns_422_when_balance_would_exceed_contract_maximum(client) -> None:
+    await client.post("/v1/users", json=create_user_payload("balance-cap@example.com"))
+    headers = await login_and_get_headers(client, "balance-cap@example.com")
+    account = await create_account_via_api(client, headers)
+
+    await create_transaction_via_api(
+        client,
+        account["accountNumber"],
+        headers,
+        amount=9999.00,
+        transaction_type="deposit",
+        reference="Nearly maxed",
+    )
+
+    response = await client.post(
+        f"/v1/accounts/{account['accountNumber']}/transactions",
+        json={
+            "amount": 2.00,
+            "currency": "GBP",
+            "type": "deposit",
+            "reference": "Too much",
+        },
+        headers=headers,
+    )
+
+    assert response.status_code == 422
+    assert response.json() == {"message": "Account balance cannot exceed 10000.00"}
 
 
 async def test_list_transactions_returns_200_for_owned_account(client) -> None:

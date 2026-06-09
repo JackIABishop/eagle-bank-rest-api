@@ -7,6 +7,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.account import BankAccount
+from app.models.transaction import Transaction
 from app.models.user import User
 from app.schemas.account import (
     BankAccountResponse,
@@ -47,25 +48,6 @@ def get_account_by_number(db: Session, account_number: str) -> BankAccount | Non
     return db.query(BankAccount).filter(BankAccount.account_number == account_number).first()
 
 
-def get_owned_account_or_raise(
-    db: Session,
-    account_number: str,
-    current_user: User,
-    *,
-    forbidden_detail: str,
-) -> BankAccount:
-    """Fetch an account and enforce that it belongs to the authenticated user."""
-
-    account = get_account_by_number(db, account_number)
-    if account is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bank account was not found")
-
-    if account.user_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=forbidden_detail)
-
-    return account
-
-
 def list_accounts_for_user(db: Session, current_user: User) -> list[BankAccount]:
     return (
         db.query(BankAccount)
@@ -89,7 +71,18 @@ def update_account(db: Session, account: BankAccount, payload: UpdateBankAccount
 
 
 def delete_account(db: Session, account: BankAccount) -> None:
-    # TODO: Need to check the bank account is empty before deleting?
+    has_transactions = (
+        db.query(Transaction.id)
+        .filter(Transaction.account_number == account.account_number)
+        .first()
+        is not None
+    )
+    if has_transactions:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Bank account cannot be deleted while transactions exist",
+        )
+
     db.delete(account)
     db.commit()
 

@@ -49,7 +49,8 @@ The aim is to cover at least one of each CRUD-style operation across the main el
 - [x] List own accounts
 - [x] ★ Fetch own account
 - [x] Update own account
-- [x] Delete own account
+- [x] Delete own account when no transaction history exists
+- [x] ★ Reject deleting an account that already has transactions
 - [x] ★ Handle validation errors
 - [x] ★ Handle unauthenticated access
 - [x] ★ Handle forbidden access to another user's account
@@ -61,6 +62,7 @@ The aim is to cover at least one of each CRUD-style operation across the main el
 - [x] ★ Create deposit transaction
 - [x] ★ Create withdrawal transaction
 - [x] ★ Reject withdrawal with insufficient funds
+- [x] ★ Reject deposits that would push the balance above the contract maximum
 - [x] ★ List account transactions
 - [x] ★ Fetch specific transaction
 - [x] ★ Handle validation errors
