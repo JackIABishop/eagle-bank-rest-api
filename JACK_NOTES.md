@@ -1,9 +1,9 @@
 # Jack Notes
-> These notes are my raw, un-edited thoughts on this take home task, to help paint a picture of my thinking throughout it.
+> These notes are my raw thoughts on this take-home task, kept to help paint a picture of my thinking throughout it.
 
 Implementation tracking lives in [`docs/implementation-checklist.md`](docs/implementation-checklist.md).
 
-## Total Time taken: 
+## Total time taken
 ### 6th June: 2h 30m
 ### 7th June: 4h
 ### 8th June: 2h 
@@ -11,7 +11,7 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
 
 ## 6th June 2026 
 ### 17:00 init
-- I am going to record my time spent on this task, to give a feel for how long this took me. 
+- I am going to record my time spent on this task, to give a feel for how long this took me.
 - I would consider myself a beginner database programmer, and this is the first time that I will be setting one up from scratch. 
 - I will not pretend to know all frameworks and tech stacks related to this task, but if I have committed the code, I do have an understanding of the concepts and how to use them.
 - I will be using AI to aid me in my decision making in the interest of time on this task, but I will be using my own knowledge and understanding to make the final decisions.
@@ -29,10 +29,7 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
 - ⚠️ If this was a real system, I would be wary of returning very specific errors if a user, account, or transaction does not exist, as that can reveal information to an attacker. For this task, I will likely need to follow the contract first, but it is still worth raising as a security consideration.
 
 ### 18:30 yaml
-- OpenAPI spec structure is broadly:
-  - tags
-  - paths
-  - components
+- OpenAPI spec structure is broadly: tags, paths, and components.
 - The main endpoint groups are:
   - users
   - accounts
@@ -46,25 +43,6 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
   - client logs in -> client receives a bearer token -> client sends `Authorization: Bearer <token>` on protected requests
   - the spec defines bearer auth but does NOT define the login endpoint itself, so I need to update the OpenAPI spec with the auth endpoint I implement
   - if a protected endpoint is called without valid authentication, that should return `401`
-
-
-### 19:30 tech stack
-- I think it is useful to think about the stack by area rather than as one big blob:
-  - Language: Python
-    - This is the language I will write the application logic in. It is the base layer that everything else is built with, and it is the language I am most comfortable moving quickly in and explaining clearly in review.
-  - Web framework / API layer: FastAPI
-    - This is the part that exposes the backend as an HTTP API. It handles routes, requests, responses, and works neatly with typed models. I like it here because it maps well to an OpenAPI-driven API, and it gives me generated interactive documentation at `/docs` from the implementation itself.
-  - Data / ORM layer: SQLAlchemy
-    - This is the layer that helps the Python application talk to the database in a structured way, without me writing raw SQL for everything. I like it because it gives me a standard ORM/data layer rather than hand-rolling database access.
-  - Database engine: SQLite
-    - This is where the actual data is stored. It keeps the setup local and simple for a take-home task, which is exactly what I want here rather than extra infrastructure.
-  - Authentication approach: JWT bearer auth
-    - This is how protected endpoints know who the user is. The client logs in, receives a token, and sends it with later requests. I like it because it fits the brief and maps cleanly to the `bearerAuth` security scheme already described in the OpenAPI spec.
-
-- In Python, I would use Pydantic models for the definition and validation of structured data for use with FastAPI.
-  - request bodies
-  - response bodies
-  - validation rules
 
 
 ### Completed Today
@@ -111,6 +89,23 @@ Implementation tracking lives in [`docs/implementation-checklist.md`](docs/imple
   - My understanding is that the server signs the JWT, the client presents it later, and the server validates the token signature, expiry, and payload before using the referenced user identity.
   - I still like the idea of checking that the referenced user in the token still exists.
   - The existing `CreateUserRequest`/`UpdateUserRequest` schema did not require a password, so I have added this to support the auth flow properly.
+
+### 10:30 Tech stack choice, with simple reasons
+- I think it is useful to think about the stack by area rather than as one big blob:
+  - Language: Python
+    - This is the language I will write the application logic in. It is the base layer everything else sits on, and it is the language I am most comfortable moving quickly in and explaining clearly in review.
+  - Web framework / API layer: FastAPI
+    - This is the part that exposes the backend as an HTTP API. It handles routes, requests, responses, and works neatly with typed models. I like it here because it maps well to an OpenAPI-driven API, and it gives me generated interactive documentation at `/docs` from the implementation itself.
+  - Data / ORM layer: SQLAlchemy
+    - This is the layer that helps the Python application talk to the database in a structured way, without me writing raw SQL for everything. I like it because it gives me a standard ORM/data layer rather than hand-rolling database access.
+  - Database engine: SQLite
+    - This is where the actual data is stored. It keeps the setup local and simple for a take-home task, which is exactly what I want here rather than extra infrastructure.
+  - Authentication approach: JWT bearer auth
+    - This is how protected endpoints know who the user is. The client logs in, receives a token, and sends it with later requests. I like it because it fits the brief and maps cleanly to the `bearerAuth` security scheme already described in the OpenAPI spec.
+- In Python, I would use Pydantic models for the definition and validation of structured data for use with FastAPI.
+  - request bodies
+  - response bodies
+  - validation rules
 
 ### 11:00 Configuring FastAPI
 - I now have the first application scaffold in place, and this is how I am thinking about the structure:
