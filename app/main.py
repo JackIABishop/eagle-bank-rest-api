@@ -26,7 +26,16 @@ async def lifespan(_: FastAPI):
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
 
-    app = FastAPI(title=settings.app_name, version=settings.api_version, lifespan=lifespan)
+    app = FastAPI(
+        title=settings.app_name,
+        version=settings.api_version,
+        description=(
+            "A versioned REST API demonstrating authentication, resource ownership, "
+            "validation, persistence, and transactional business rules."
+        ),
+        lifespan=lifespan,
+        contact={"name": "Jack Bishop"},
+    )
     add_exception_handlers(app)
     app.include_router(health_router)
     app.include_router(auth_router)
@@ -38,3 +47,16 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+
+
+@app.get("/", tags=["meta"], include_in_schema=False)
+def api_index() -> dict[str, str]:
+    """Expose useful entry points for people exploring the API."""
+
+    return {
+        "name": settings.app_name,
+        "version": settings.api_version,
+        "health": "/health",
+        "documentation": "/docs",
+        "openapi": "/openapi.json",
+    }

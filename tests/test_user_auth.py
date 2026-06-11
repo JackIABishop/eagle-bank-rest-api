@@ -7,6 +7,14 @@ from tests.helpers import create_account_via_api, create_user_payload, login_and
 pytestmark = pytest.mark.anyio
 
 
+async def test_api_index_links_to_documentation_and_health(client) -> None:
+    response = await client.get("/")
+
+    assert response.status_code == 200
+    assert response.json()["documentation"] == "/docs"
+    assert response.json()["health"] == "/health"
+
+
 async def test_create_user_returns_201_and_user_shape(client) -> None:
     response = await client.post("/v1/users", json=create_user_payload())
 
