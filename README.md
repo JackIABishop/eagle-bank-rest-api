@@ -1,54 +1,55 @@
-# Eagle Bank API
+# Eagle Bank REST API
 
-FastAPI implementation of the Eagle Bank take-home REST API, built against the supplied `openapi.yaml` contract with JWT authentication, user flows, account ownership enforcement, and automated tests.
+A versioned REST API built with FastAPI and SQLAlchemy. The project demonstrates the design and implementation of an authenticated HTTP API, including resource ownership, request validation, persistence, business rules, automated tests, and generated OpenAPI documentation.
 
-## Quick Start
+## Features
 
-### Prerequisites
+- JWT bearer authentication with expiring access tokens
+- User registration and self-service profile CRUD
+- Bank account creation, listing, update, and deletion
+- Deposits and withdrawals with balance validation
+- Immutable transaction history
+- Ownership checks across protected resources
+- Consistent validation and error response shapes
+- SQLite persistence with foreign-key enforcement
+- Interactive Swagger UI and ReDoc documentation
 
-- Python 3
-- Git
+## API Overview
 
-### Install and run
+| Method             | Endpoint                                                    | Description                    |
+| ------------------ | ----------------------------------------------------------- | ------------------------------ |
+| `POST`             | `/v1/users`                                                 | Register a user                |
+| `GET/PATCH/DELETE` | `/v1/users/{userId}`                                        | Manage the authenticated user  |
+| `POST`             | `/v1/auth/login`                                            | Exchange credentials for a JWT |
+| `POST/GET`         | `/v1/accounts`                                              | Create or list owned accounts  |
+| `GET/PATCH/DELETE` | `/v1/accounts/{accountNumber}`                              | Manage an owned account        |
+| `POST/GET`         | `/v1/accounts/{accountNumber}/transactions`                 | Create or list transactions    |
+| `GET`              | `/v1/accounts/{accountNumber}/transactions/{transactionId}` | Fetch one transaction          |
+| `GET`              | `/health`                                                   | Service health check           |
+
+The full contract is available in [`openapi.yaml`](openapi.yaml) and from the running application at `/openapi.json`.
+
+## Run Locally
+
+Requires Python 3.12 or later.
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-Once running, the main URLs are:
+Open:
 
-- `http://127.0.0.1:8000/health`
-- `http://127.0.0.1:8000/docs`
+- API index: `http://127.0.0.1:8000/`
+- Swagger UI: `http://127.0.0.1:8000/docs`
+- ReDoc: `http://127.0.0.1:8000/redoc`
+- Health check: `http://127.0.0.1:8000/health`
 
-## Run Tests
+## Example
 
-```bash
-pytest
-```
-
-## Reviewer Guide
-
-If reviewing the project quickly, the most useful order is:
-
-1. `README.md` for setup, scope, and tradeoffs
-2. `openapi.yaml` for the API contract
-3. `http://127.0.0.1:8000/docs` for the live FastAPI-generated documentation
-4. `tests/test_user_auth.py`, `tests/test_accounts.py`, and `tests/test_transactions.py` for executable behaviour
-5. `docs/implementation-checklist.md` for implemented vs deferred work
-6. `JACK_NOTES.md` for design reasoning and working notes
-
-The implementation checklist is the clearest single view of what is complete, what was prioritised, and which tradeoffs were left explicit for discussion.
-
-## Scope Note
-
-This README does not repeat the full endpoint-by-endpoint implementation list. The detailed view of completed and deferred scenarios lives in `docs/implementation-checklist.md`, which follows the supplied take-home scenarios more closely.
-
-## Example Flow
-
-Create a user:
+Register:
 
 ```bash
 curl -X POST http://127.0.0.1:8000/v1/users \
@@ -67,65 +68,58 @@ curl -X POST http://127.0.0.1:8000/v1/users \
   }'
 ```
 
-Log in and get a bearer token:
+Log in:
 
 ```bash
 curl -X POST http://127.0.0.1:8000/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{
-    "email": "user@example.com",
-    "password": "correct-horse-battery"
-  }'
+  -d '{"email":"user@example.com","password":"correct-horse-battery"}'
 ```
 
-Create an account with that token:
+Use the returned token on protected routes:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/v1/accounts \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <accessToken>" \
-  -d '{
-    "name": "Daily Account",
-    "accountType": "personal"
-  }'
+curl http://127.0.0.1:8000/v1/accounts \
+  -H "Authorization: Bearer <accessToken>"
 ```
 
-## Project Structure
-
-- `app/` FastAPI application code
-- `app/routers/` HTTP routes
-- `app/services/` business logic
-- `app/models/` SQLAlchemy models
-- `app/schemas/` request and response schemas
-- `tests/` API tests
-- `docs/` supporting notes and implementation tracking
-- `openapi.yaml` API contract used as the implementation reference
-
-## Design Decisions and Tradeoffs
-
-- FastAPI was chosen because it maps cleanly to an OpenAPI-driven workflow and provides useful live documentation at `/docs`.
-- SQLite keeps local setup simple for a take-home exercise and avoids extra infrastructure, at the cost of file-based locking limitations during development.
-- SQLite foreign-key enforcement is turned on explicitly, because SQLite does not enable it by default and I still wanted relational integrity checks to behave like a real database-backed service.
-- JWT bearer authentication matches the supplied security scheme and keeps protected route checks consistent.
-
-## Additional Integrity Decision
-
-- I added one explicit rule beyond the base happy path: an account cannot be deleted once it has transaction history.
-- This is called out separately because it is an implementation decision to preserve relational and audit integrity, rather than a claim that the supplied brief spelled it out verbatim.
-
-## Request Flow
+## Architecture
 
 ```mermaid
 flowchart LR
-    Client["Client or Swagger UI"] --> Router["FastAPI routers"]
-    Router --> Auth["JWT auth dependency"]
-    Auth --> Services["Service layer"]
-    Services --> Models["SQLAlchemy models"]
-    Models --> DB["SQLite database"]
+    Client["HTTP client"] --> Router["FastAPI routers"]
+    Router --> Auth["JWT dependency"]
+    Router --> Service["Service layer"]
+    Auth --> Database["SQLAlchemy session"]
+    Service --> Database
+    Database --> SQLite["SQLite"]
 ```
 
-## Notes
+- `app/routers/` defines the HTTP interface and status codes.
+- `app/schemas/` validates request and response bodies with Pydantic.
+- `app/services/` contains business logic and persistence operations.
+- `app/models/` defines the SQLAlchemy database models.
+- `tests/` exercises the API through an isolated database per test.
 
-- The original PDF brief is intentionally not committed. This repository keeps the implementation-facing contract in `openapi.yaml` while omitting the supplied interview materials.
-- AI assistance was used to accelerate scaffolding and boilerplate. The resulting code was reviewed, shaped, and tested rather than treated as trusted output.
-- SQLite is file-based, so there is no separate database server to start.
+Transactions are append-only. Accounts with transaction history cannot be deleted, and users with existing accounts must remove those accounts before deleting their profile. These rules preserve relational and audit integrity.
+
+## Tests
+
+```bash
+pytest
+```
+
+The suite covers authentication, validation, ownership boundaries, CRUD behavior, insufficient funds, balance limits, and deletion conflicts.
+
+## Configuration
+
+Configuration is read from environment variables:
+
+- `APP_NAME`
+- `API_VERSION`
+- `DATABASE_URL`
+- `JWT_SECRET_KEY`
+- `JWT_ALGORITHM`
+- `JWT_EXPIRY_SECONDS`
+
+The defaults support local development. `JWT_SECRET_KEY` must be replaced in a deployed environment.

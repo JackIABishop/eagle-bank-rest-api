@@ -30,8 +30,8 @@ def configure_sqlite(engine: Engine) -> None:
     @event.listens_for(engine, "connect")
     def _set_sqlite_pragma(dbapi_connection, _connection_record) -> None:
         # SQLite does not enforce foreign keys unless this pragma is enabled.
-        # Turning it on keeps the take-home closer to how a relational system
-        # would protect account/user integrity in a fuller deployment.
+        # Turning it on keeps local behavior aligned with the relational
+        # integrity expected in a fuller deployment.
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()
