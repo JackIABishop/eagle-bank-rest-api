@@ -13,6 +13,7 @@ A versioned REST API built with FastAPI and SQLAlchemy. The project demonstrates
 - Consistent validation and error response shapes
 - SQLite persistence with foreign-key enforcement
 - Interactive Swagger UI and ReDoc documentation
+- Optional Docker runtime
 
 ## API Overview
 
@@ -46,6 +47,19 @@ Open:
 - Swagger UI: `http://127.0.0.1:8000/docs`
 - ReDoc: `http://127.0.0.1:8000/redoc`
 - Health check: `http://127.0.0.1:8000/health`
+
+## Run With Docker
+
+Docker packages the Python runtime and application dependencies into a repeatable image. The named volume keeps the SQLite database after the container stops.
+
+```bash
+docker build -t eagle-bank-api .
+docker run --rm -p 8000:8000 \
+  -e JWT_SECRET_KEY="replace-with-a-long-random-secret" \
+  -e DATABASE_URL="sqlite:////data/eagle_bank.db" \
+  -v eagle-bank-data:/data \
+  eagle-bank-api
+```
 
 ## Example
 

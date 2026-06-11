@@ -1,0 +1,12 @@
+.git
+.github
+.venv
+.pytest_cache
+__pycache__
+*.pyc
+*.db
+*.db-journal
+.env
+htmlcov
+coverage
+Take Home coding test v2.pdf
