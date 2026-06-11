@@ -137,3 +137,7 @@ Configuration is read from environment variables:
 - `JWT_EXPIRY_SECONDS`
 
 The defaults support local development. `JWT_SECRET_KEY` must be replaced in a deployed environment.
+
+## License
+
+Released under the [MIT License](LICENSE).

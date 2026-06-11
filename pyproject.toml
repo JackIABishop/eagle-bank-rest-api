@@ -8,6 +8,7 @@ version = "1.0.0"
 description = "A FastAPI portfolio project demonstrating a versioned banking REST API."
 readme = "README.md"
 requires-python = ">=3.12"
+license = { text = "MIT" }
 authors = [{ name = "Jack Bishop" }]
 dependencies = [
     "fastapi>=0.115,<1.0",

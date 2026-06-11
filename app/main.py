@@ -35,6 +35,7 @@ def create_app() -> FastAPI:
         ),
         lifespan=lifespan,
         contact={"name": "Jack Bishop"},
+        license_info={"name": "MIT"},
     )
     add_exception_handlers(app)
     app.include_router(health_router)
