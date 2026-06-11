@@ -25,6 +25,14 @@ class CreateUserRequest(BaseModel):
     password: str = Field(min_length=8)
 
 
+class UpdateUserRequest(BaseModel):
+    name: str | None = None
+    address: AddressSchema | None = None
+    phoneNumber: str | None = Field(default=None, pattern=PHONE_PATTERN)
+    email: str | None = Field(default=None, pattern=EMAIL_PATTERN)
+    password: str | None = Field(default=None, min_length=8)
+
+
 class UserResponse(BaseModel):
     id: str
     name: str

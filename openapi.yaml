@@ -1,9 +1,11 @@
 openapi: 3.1.0
 info:
-  title: Take home tech task
+  title: Eagle Bank REST API
   version: v1.0.0
   description: |-
-    We want you to create a REST API for Eagle Bank which conforms to this OpenAPI specification which allows a user to create, fetch, update and delete a bank account and deposit or withdraw money from the account. These will be stored as transactions against a bank account which be retrieved but not modified or deleted.
+    A portfolio REST API for managing users, bank accounts, and immutable account
+    transactions. It demonstrates JWT authentication, resource ownership,
+    validation, relational persistence, and consistent HTTP error responses.
 tags:
   - name: auth
     description: Authenticate a user
@@ -599,6 +601,12 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         '404':
           description: User was not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        '409':
+          description: Email address is already in use
           content:
             application/json:
               schema:

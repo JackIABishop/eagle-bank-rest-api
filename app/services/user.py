@@ -3,10 +3,12 @@ from __future__ import annotations
 import json
 from uuid import uuid4
 
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.models.account import BankAccount
 from app.models.user import User
-from app.schemas.user import CreateUserRequest, UserResponse
+from app.schemas.user import CreateUserRequest, UpdateUserRequest, UserResponse
 from app.services.auth import hash_password
 
 
@@ -30,6 +32,46 @@ def create_user(db: Session, payload: CreateUserRequest) -> User:
     db.commit()
     db.refresh(user)
     return user
+
+
+def update_user(db: Session, user: User, payload: UpdateUserRequest) -> User:
+    updates = payload.model_dump(exclude_unset=True)
+
+    if "email" in updates and updates["email"] != user.email:
+        existing_user = db.query(User).filter(User.email == updates["email"]).first()
+        if existing_user is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A user with that email already exists",
+            )
+
+    if "name" in updates:
+        user.name = updates["name"]
+    if "address" in updates:
+        user.address = json.dumps(updates["address"])
+    if "phoneNumber" in updates:
+        user.phone_number = updates["phoneNumber"]
+    if "email" in updates:
+        user.email = updates["email"]
+    if "password" in updates:
+        user.password_hash = hash_password(updates["password"])
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def delete_user(db: Session, user: User) -> None:
+    has_accounts = db.query(BankAccount.account_number).filter(BankAccount.user_id == user.id).first() is not None
+    if has_accounts:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User cannot be deleted while bank accounts exist",
+        )
+
+    db.delete(user)
+    db.commit()
 
 
 def serialise_user(user: User) -> UserResponse:
